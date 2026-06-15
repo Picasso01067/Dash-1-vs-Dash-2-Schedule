@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSIT Schedule – First Semester</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3e;
+    --accent-21: #5b8dee;
+    --accent-22: #e85d75;
+    --text: #e8eaf0;
+    --muted: #7b7f95;
+    --label: #b0b4cc;
+    --mon: #1e2235;
+    --tue: #1e2235;
+    --wed: #1e2235;
+    --thu: #1e2235;
+    --fri: #1e2235;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--label);
+    font-weight: 500;
+  }
+
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+
+  .dot-21 { background: var(--accent-21); }
+  .dot-22 { background: var(--accent-22); }
+
+  /* ── SECTION TABS ── */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .tab {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .tab.active-21, .tab:hover { color: var(--text); }
+  .tab.active-21 { border-color: var(--accent-21); background: rgba(91,141,238,0.12); color: var(--accent-21); }
+  .tab.active-22 { border-color: var(--accent-22); background: rgba(232,93,117,0.12); color: var(--accent-22); }
+
+  /* ── GRID ── */
+  .schedule-grid {
+    display: none;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .schedule-grid.visible { display: block; }
+
+  .day-block {
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .day-header {
+    padding: 10px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--surface);
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .class-row {
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .class-row:last-child { border-bottom: none; }
+  .class-row:hover { background: rgba(255,255,255,0.03); }
+
+  .time-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1.4;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .time-21 { background: rgba(91,141,238,0.18); color: var(--accent-21); }
+  .time-22 { background: rgba(232,93,117,0.18); color: var(--accent-22); }
+
+  .class-name {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .class-code {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .room-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 3px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .empty-day {
+    padding: 12px 16px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── SUMMARY TABLE ── */
+  .summary {
+    max-width: 680px;
+    margin: 32px auto 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .summary-header {
+    padding: 12px 16px;
+    background: var(--surface);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+
+  th {
+    padding: 9px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 16px;
+    color: var(--label);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  td:first-child { color: var(--text); font-weight: 500; }
+
+  .sched-21 { color: var(--accent-21); }
+  .sched-22 { color: var(--accent-22); }
+
+  .total-row td {
+    font-weight: 700;
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BSIT — First Semester Schedule</h1>
+  <p>Section 2-1 &nbsp;vs&nbsp; Section 2-2 &nbsp;·&nbsp; 9 subjects &nbsp;·&nbsp; 25 units</p>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot dot-21"></div> Section 2-1</div>
+  <div class="legend-item"><div class="dot dot-22"></div> Section 2-2</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active-21" onclick="show('21')">Section 2-1</button>
+  <button class="tab" onclick="show('22')">Section 2-2</button>
+</div>
+
+<!-- ══ SECTION 2-1 ══ -->
+<div class="schedule-grid visible" id="grid-21">
+
+  <div class="day-block">
+    <div class="day-header">Monday</div>
+    <div class="class-row">
+      <span class="time-badge time-21">7–8:30 AM</span>
+      <div><div class="class-name">Science, Technology and Society</div><div class="class-code">GEC 6</div></div>
+      <span class="room-badge">R3</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">8:30–10 AM</span>
+      <div><div class="class-name">Foreign Language 2</div><div class="class-code">GE ELEC IT 3</div></div>
+      <span class="room-badge">R1</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">3–5 PM</span>
+      <div><div class="class-name">Data Structures and Algorithms</div><div class="class-code">IT 211</div></div>
+      <span class="room-badge">R2</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">3–5 PM</span>
+      <div><div class="class-name">Platform Technologies</div><div class="class-code">IT Elec 1</div></div>
+      <span class="room-badge">CL2</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Tuesday</div>
+    <div class="class-row">
+      <span class="time-badge time-21">8–9 AM</span>
+      <div><div class="class-name">Creative and Critical Thinking</div><div class="class-code">IT INST 2</div></div>
+      <span class="room-badge">—</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">9 AM–12 PM</span>
+      <div><div class="class-name">Creative and Critical Thinking (lab)</div><div class="class-code">IT INST 2</div></div>
+      <span class="room-badge">—</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">4–5 PM</span>
+      <div><div class="class-name">Object-Oriented Programming</div><div class="class-code">IT ELEC 2</div></div>
+      <span class="room-badge">R2</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">2:30–4 PM</span>
+      <div><div class="class-name">The Contemporary World</div><div class="class-code">GEC 8</div></div>
+      <span class="room-badge">R4</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Wednesday</div>
+    <div class="class-row">
+      <span class="time-badge time-21">7–8:30 AM</span>
+      <div><div class="class-name">Science, Technology and Society</div><div class="class-code">GEC 6</div></div>
+      <span class="room-badge">R3</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">8:30–10 AM</span>
+      <div><div class="class-name">Foreign Language 2</div><div class="class-code">GE ELEC IT 3</div></div>
+      <span class="room-badge">R1</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">10 AM–1 PM</span>
+      <div><div class="class-name">Data Structures and Algorithms (lab)</div><div class="class-code">IT 211</div></div>
+      <span class="room-badge">CL1</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">2–5 PM</span>
+      <div><div class="class-name">Object-Oriented Programming (lab)</div><div class="class-code">IT ELEC 2</div></div>
+      <span class="room-badge">CL3</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Thursday</div>
+    <div class="class-row">
+      <span class="time-badge time-21">8–10 AM</span>
+      <div><div class="class-name">Physical Activity / PE 3</div><div class="class-code">PE 3</div></div>
+      <span class="room-badge">GYM</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">2:30–4 PM</span>
+      <div><div class="class-name">The Contemporary World</div><div class="class-code">GEC 8</div></div>
+      <span class="room-badge">R4</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">4–5 PM</span>
+      <div><div class="class-name">Object-Oriented Programming</div><div class="class-code">IT ELEC 2</div></div>
+      <span class="room-badge">R2</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Friday</div>
+    <div class="class-row">
+      <span class="time-badge time-21">7–10 AM</span>
+      <div><div class="class-name">Business Communication</div><div class="class-code">IT BPO 1</div></div>
+      <span class="room-badge">R2</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-21">3–5 PM</span>
+      <div><div class="class-name">Platform Technologies (lab)</div><div class="class-code">IT Elec 1</div></div>
+      <span class="room-badge">RX</span>
+    </div>
+  </div>
+
+</div><!-- /grid-21 -->
+
+<!-- ══ SECTION 2-2 ══ -->
+<div class="schedule-grid" id="grid-22">
+
+  <div class="day-block">
+    <div class="day-header">Monday</div>
+    <div class="class-row">
+      <span class="time-badge time-22">8:30–10 AM</span>
+      <div><div class="class-name">Science, Technology and Society</div><div class="class-code">GEC 6</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">10–11:30 AM</span>
+      <div><div class="class-name">Foreign Language 2</div><div class="class-code">GE ELEC IT 3</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">1–3 PM</span>
+      <div><div class="class-name">Data Structures and Algorithms</div><div class="class-code">IT 211</div></div>
+      <span class="room-badge">R2</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">2–5 PM</span>
+      <div><div class="class-name">Platform Technologies (lab)</div><div class="class-code">IT Elec 1</div></div>
+      <span class="room-badge">CL2</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">3–5 PM</span>
+      <div><div class="class-name">Physical Activity / PE 3</div><div class="class-code">PE 3</div></div>
+      <span class="room-badge">GYM</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Tuesday</div>
+    <div class="class-row">
+      <span class="time-badge time-22">10 AM–1 PM</span>
+      <div><div class="class-name">Object-Oriented Programming (lab)</div><div class="class-code">IT ELEC 2</div></div>
+      <span class="room-badge">T</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Wednesday</div>
+    <div class="class-row">
+      <span class="time-badge time-22">8:30–10 AM</span>
+      <div><div class="class-name">Science, Technology and Society</div><div class="class-code">GEC 6</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">10–11:30 AM</span>
+      <div><div class="class-name">Foreign Language 2</div><div class="class-code">GE ELEC IT 3</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">1–2 PM</span>
+      <div><div class="class-name">Object-Oriented Programming</div><div class="class-code">IT ELEC 2</div></div>
+      <span class="room-badge">R2 CL3</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">2–5 PM</span>
+      <div><div class="class-name">Platform Technologies (lab)</div><div class="class-code">IT Elec 1</div></div>
+      <span class="room-badge">CL2</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Thursday</div>
+    <div class="class-row">
+      <span class="time-badge time-22">8–12 PM</span>
+      <div><div class="class-name">Creative and Critical Thinking</div><div class="class-code">IT INST 2</div></div>
+      <span class="room-badge">—</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">7–10 AM</span>
+      <div><div class="class-name">Data Structures and Algorithms (lab)</div><div class="class-code">IT 211</div></div>
+      <span class="room-badge">IT LAB 1</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">2:30–4 PM</span>
+      <div><div class="class-name">Business Communication</div><div class="class-code">IT BPO 1</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">4–5:30 PM</span>
+      <div><div class="class-name">The Contemporary World</div><div class="class-code">GEC 8</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Friday</div>
+    <div class="class-row">
+      <span class="time-badge time-22">10 AM–12 PM</span>
+      <div><div class="class-name">Platform Technologies</div><div class="class-code">IT Elec 1</div></div>
+      <span class="room-badge">RX</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">2:30–4 PM</span>
+      <div><div class="class-name">Business Communication</div><div class="class-code">IT BPO 1</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+    <div class="class-row">
+      <span class="time-badge time-22">4–5:30 PM</span>
+      <div><div class="class-name">The Contemporary World</div><div class="class-code">GEC 8</div></div>
+      <span class="room-badge">R5</span>
+    </div>
+  </div>
+
+</div><!-- /grid-22 -->
+
+<!-- ══ COMPARISON TABLE ══ -->
+<div class="summary">
+  <div class="summary-header">Subject Comparison — Both Sections</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Units</th>
+        <th>Section 2-1</th>
+        <th>Section 2-2</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Creative & Critical Thinking<br><span style="color:var(--muted);font-size:0.68rem">IT INST 2</span></td>
+        <td>2</td>
+        <td class="sched-21">8–9 AM T<br>9–12 AM T</td>
+        <td class="sched-22">8–12 TH</td>
+      </tr>
+      <tr>
+        <td>Science, Tech & Society<br><span style="color:var(--muted);font-size:0.68rem">GEC 6</span></td>
+        <td>3</td>
+        <td class="sched-21">7–8:30 AM MW · R3</td>
+        <td class="sched-22">8:30–10 AM MW · R5</td>
+      </tr>
+      <tr>
+        <td>Foreign Language 2<br><span style="color:var(--muted);font-size:0.68rem">GE ELEC IT 3</span></td>
+        <td>3</td>
+        <td class="sched-21">8:30–10 AM MW · R1</td>
+        <td class="sched-22">10–11:30 AM MW · R5</td>
+      </tr>
+      <tr>
+        <td>Data Structures & Algorithms<br><span style="color:var(--muted);font-size:0.68rem">IT 211</span></td>
+        <td>3</td>
+        <td class="sched-21">3–5 PM M · R2<br>10 AM–1 PM W · CL1</td>
+        <td class="sched-22">1–3 PM M · R2<br>7–10 AM T · IT LAB 1</td>
+      </tr>
+      <tr>
+        <td>PE 3 – Physical Activity<br><span style="color:var(--muted);font-size:0.68rem">PE 3</span></td>
+        <td>2</td>
+        <td class="sched-21">8–10 AM Th · GYM</td>
+        <td class="sched-22">3–5 PM M · GYM</td>
+      </tr>
+      <tr>
+        <td>Business Communication<br><span style="color:var(--muted);font-size:0.68rem">IT BPO 1</span></td>
+        <td>3</td>
+        <td class="sched-21">7–10 AM F · R2</td>
+        <td class="sched-22">2:30–4 PM TF · R5</td>
+      </tr>
+      <tr>
+        <td>The Contemporary World<br><span style="color:var(--muted);font-size:0.68rem">GEC 8</span></td>
+        <td>3</td>
+        <td class="sched-21">2:30–4 PM TTh · R4</td>
+        <td class="sched-22">4–5:30 PM TF · R5</td>
+      </tr>
+      <tr>
+        <td>Object-Oriented Programming<br><span style="color:var(--muted);font-size:0.68rem">IT ELEC 2</span></td>
+        <td>3</td>
+        <td class="sched-21">4–5 PM TTh · R2<br>2–5 PM W · CL3</td>
+        <td class="sched-22">1–2 PM W · R2 CL3<br>10 AM–1 PM T</td>
+      </tr>
+      <tr>
+        <td>Platform Technologies<br><span style="color:var(--muted);font-size:0.68rem">IT Elec 1</span></td>
+        <td>3</td>
+        <td class="sched-21">3–5 PM F · RX<br>10 AM–1 PM M · CL2</td>
+        <td class="sched-22">10 AM–12 PM F · RX<br>2–5 PM MW · CL2</td>
+      </tr>
+      <tr class="total-row">
+        <td>Total</td>
+        <td>25</td>
+        <td class="sched-21">—</td>
+        <td class="sched-22">—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function show(section) {
+    document.querySelectorAll('.schedule-grid').forEach(g => g.classList.remove('visible'));
+    document.querySelectorAll('.tab').forEach(t => { t.className = 'tab'; });
+    document.getElementById('grid-' + section).classList.add('visible');
+    const btn = [...document.querySelectorAll('.tab')].find(t => t.textContent.includes('2-' + section.slice(-1)));
+    if (btn) btn.classList.add('active-' + section);
+  }
+  // init
+  document.querySelectorAll('.tab')[0].classList.add('active-21');
+</script>
+</body>
+</html>
