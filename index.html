@@ -5,111 +5,279 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BSIT Schedule – First Semester</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --border: #2a2d3e;
-    --accent-21: #5b8dee;
-    --accent-22: #e85d75;
-    --text: #e8eaf0;
-    --muted: #7b7f95;
-    --label: #b0b4cc;
-    --mon: #1e2235;
-    --tue: #1e2235;
-    --wed: #1e2235;
-    --thu: #1e2235;
-    --fri: #1e2235;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    padding: 24px 16px 48px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    padding: 20px;
   }
 
-  header {
+  h1 {
     text-align: center;
-    margin-bottom: 32px;
-  }
-
-  header h1 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.6rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text);
+    color: #333;
+    margin-bottom: 6px;
   }
 
-  header p {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin-top: 4px;
+  p.sub {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #777;
+    margin-bottom: 14px;
   }
 
-  .legend {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    color: var(--label);
-    font-weight: 500;
-  }
-
-  .dot {
-    width: 12px; height: 12px;
-    border-radius: 3px;
-  }
-
-  .dot-21 { background: var(--accent-21); }
-  .dot-22 { background: var(--accent-22); }
-
-  /* ── SECTION TABS ── */
+  /* Tabs */
   .tabs {
     display: flex;
-    gap: 8px;
     justify-content: center;
-    margin-bottom: 28px;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
-  .tab {
-    padding: 8px 20px;
+  .tab-btn {
+    padding: 7px 24px;
     border-radius: 20px;
-    border: 1.5px solid var(--border);
-    background: transparent;
-    color: var(--muted);
+    border: 2px solid #ccc;
+    background: #fff;
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.2s;
+    color: #555;
+    transition: all 0.18s;
   }
 
-  .tab.active-21, .tab:hover { color: var(--text); }
-  .tab.active-21 { border-color: var(--accent-21); background: rgba(91,141,238,0.12); color: var(--accent-21); }
-  .tab.active-22 { border-color: var(--accent-22); background: rgba(232,93,117,0.12); color: var(--accent-22); }
+  .tab-btn.on21 { border-color: #4a90d9; background: #e8f1fb; color: #2a6db5; }
+  .tab-btn.on22 { border-color: #d96060; background: #fbeaea; color: #b52a2a; }
 
-  /* ── GRID ── */
-  .schedule-grid {
+  /* Grid wrapper — horizontally scrollable */
+  .grid-wrap {
+    overflow-x: auto;
     display: none;
-    max-width: 680px;
-    margin: 0 auto;
   }
-  .schedule-grid.visible { display: block; }
+  .grid-wrap.active { display: block; }
 
+  /* The grid itself */
+  .cal {
+    display: grid;
+    /* col 0 = time label, cols 1-5 = days */
+    grid-template-columns: 70px repeat(5, minmax(140px, 1fr));
+    min-width: 780px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* Header row */
+  .cal-head {
+    background: #f7f8fa;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #555;
+    text-align: center;
+    padding: 8px 4px;
+    border-bottom: 2px solid #e0e0e0;
+    border-right: 1px solid #e8e8e8;
+  }
+  .cal-head:last-child { border-right: none; }
+
+  /* Time-slot rows */
+  .time-label {
+    font-size: 0.68rem;
+    color: #999;
+    text-align: right;
+    padding: 0 8px 0 0;
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #f0f0f0;
+    line-height: 1;
+    /* height controlled by JS */
+    display: flex;
+    align-items: flex-start;
+    padding-top: 3px;
+  }
+
+  .day-col {
+    border-right: 1px solid #e8e8e8;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+  }
+  .day-col:last-child { border-right: none; }
+
+  /* Class block */
+  .block {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    padding: 5px 7px;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    overflow: hidden;
+    cursor: default;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  .block .bname { font-weight: 700; font-size: 0.72rem; }
+  .block .btime { font-size: 0.63rem; opacity: 0.85; }
+  .block .broom { font-size: 0.63rem; opacity: 0.85; }
+  .block .bteacher { font-size: 0.62rem; opacity: 0.75; font-style: italic; }
+
+  /* Color palette */
+  .c-green  { background: #b8dcb0; color: #1e5c15; border-left: 3px solid #4a9940; }
+  .c-yellow { background: #f5e9a0; color: #5a4a00; border-left: 3px solid #c9a800; }
+  .c-pink   { background: #f4b8b8; color: #7a1515; border-left: 3px solid #d94040; }
+  .c-purple { background: #d4b8e8; color: #3a1560; border-left: 3px solid #8840c9; }
+  .c-blue   { background: #b8d4f0; color: #0f3060; border-left: 3px solid #3070c9; }
+  .c-teal   { background: #b0ddd8; color: #0d4040; border-left: 3px solid #2a9990; }
+  .c-orange { background: #f5c8a0; color: #5a2800; border-left: 3px solid #d97020; }
+  .c-olive  { background: #d0d4a0; color: #303800; border-left: 3px solid #7a8820; }
+  .c-rose   { background: #f0b8cc; color: #5a1030; border-left: 3px solid #c93060; }
+</style>
+</head>
+<body>
+
+<h1>BSIT — First Semester Class Schedule</h1>
+<p class="sub">9 subjects · 25 units · First Semester</p>
+
+<div class="tabs">
+  <button class="tab-btn on21" onclick="show('21')">Section 2-1</button>
+  <button class="tab-btn" id="btn22" onclick="show('22')">Section 2-2</button>
+</div>
+
+<div class="grid-wrap active" id="wrap21"></div>
+<div class="grid-wrap" id="wrap22"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const SLOT_H = 30;   // px per 30-minute slot
+const START  = 7;    // 7:00 AM
+const END    = 17.5; // 5:00 PM (last label)
+const DAYS   = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+
+// Each class: { name, teacher?, time, days, room, color }
+// time = [startHour, endHour] in decimal (e.g. 8.5 = 8:30)
+const DATA = {
+  '21': [
+    { name:'Technology and Society',        code:'GEC 6',         days:[0,2], time:[7,8.5],   room:'R3',       color:'c-green'  },
+    { name:'Foreign Language 2',             code:'GE ELEC IT 3', days:[0,2], time:[8.5,10],  room:'R1',       color:'c-pink'   },
+    { name:'Platform Technologies',          code:'IT Elec 1',    days:[0],   time:[10,13],   room:'CL2',      color:'c-olive'  },
+    { name:'Data Structure and Algorithms',  code:'IT 211',       days:[0],   time:[15,17],   room:'R2',       color:'c-purple' },
+    { name:'Creative and Critical Thinking', code:'IT INST 2',    days:[1],   time:[8,9],     room:'',         color:'c-yellow' },
+    { name:'Creative and Critical Thinking (cont.)', code:'IT INST 2', days:[1], time:[9,12], room:'',         color:'c-yellow' },
+    { name:'Contemporary World',             code:'GEC 8',        days:[1,3], time:[14.5,16], room:'R4',       color:'c-teal'   },
+    { name:'Object Oriented Programming',    code:'IT ELEC 2',    days:[1,3], time:[16,17],   room:'R2',       color:'c-rose'   },
+    { name:'Data Structure and Algorithms',  code:'IT 211',       days:[2],   time:[10,13],   room:'CL1',      color:'c-purple' },
+    { name:'Object Oriented Programming',    code:'IT ELEC 2',    days:[2],   time:[14,17],   room:'CL3',      color:'c-rose'   },
+    { name:'PathFit 3',                      code:'PE 3',         days:[3],   time:[8,10],    room:'Gym',      color:'c-blue'   },
+    { name:'Business Communication',         code:'IT BPO 1',     days:[4],   time:[7,10],    room:'R2',       color:'c-orange' },
+    { name:'Platform Technologies',          code:'IT Elec 1',    days:[4],   time:[15,17],   room:'RX',       color:'c-olive'  },
+  ],
+  '22': [
+    { name:'Creative and Critical Thinking', code:'IT INST 2',    days:[3],   time:[8,12],    room:'',         color:'c-yellow' },
+    { name:'Technology and Society',         code:'GEC 6',        days:[0,2], time:[8.5,10],  room:'R5',       color:'c-green'  },
+    { name:'Foreign Language 2',             code:'GE ELEC IT 3', days:[0,2], time:[10,11.5], room:'R5',       color:'c-pink'   },
+    { name:'Data Structure and Algorithms',  code:'IT 211',       days:[0],   time:[13,15],   room:'R2',       color:'c-purple' },
+    { name:'Data Structure and Algorithms',  code:'IT 211',       days:[1],   time:[7,10],    room:'IT LAB 1', color:'c-purple' },
+    { name:'Object Oriented Programming',    code:'IT ELEC 2',    days:[1],   time:[10,13],   room:'CL3',      color:'c-rose'   },
+    { name:'Object Oriented Programming',    code:'IT ELEC 2',    days:[2],   time:[13,14],   room:'R2',       color:'c-rose'   },
+    { name:'Platform Technologies',          code:'IT Elec 1',    days:[0,2], time:[14,17],   room:'CL2',      color:'c-olive'  },
+    { name:'PathFit 3',                      code:'PE 3',         days:[0],   time:[15,17],   room:'Gym',      color:'c-blue'   },
+    { name:'Business Communication',         code:'IT BPO 1',     days:[1,4], time:[14.5,16], room:'R5',       color:'c-orange' },
+    { name:'Contemporary World',             code:'GEC 8',        days:[1,4], time:[16,17.5], room:'R5',       color:'c-teal'   },
+    { name:'Platform Technologies',          code:'IT Elec 1',    days:[4],   time:[10,12],   room:'RX',       color:'c-olive'  },
+  ]
+};
+
+function fmt(h) {
+  const hh = Math.floor(h);
+  const mm = (h - hh) === 0.5 ? '30' : '00';
+  const ampm = hh >= 12 ? 'PM' : 'AM';
+  const disp = hh > 12 ? hh - 12 : hh;
+  return `${disp}:${mm}${ampm}`;
+}
+
+function buildGrid(section) {
+  const classes = DATA[section];
+  const totalSlots = (END - START) * 2; // 30-min slots
+
+  let html = '<div class="cal">';
+
+  // Header
+  html += '<div class="cal-head"></div>';
+  DAYS.forEach(d => { html += `<div class="cal-head">${d}</div>`; });
+
+  // Time rows
+  for (let s = 0; s < totalSlots; s++) {
+    const hour = START + s * 0.5;
+    const isHour = (hour % 1 === 0);
+    html += `<div class="time-label" style="height:${SLOT_H}px">${isHour ? fmt(hour) : ''}</div>`;
+    DAYS.forEach((_, di) => {
+      html += `<div class="day-col" data-day="${di}" data-slot="${s}" style="height:${SLOT_H}px"></div>`;
+    });
+  }
+
+  html += '</div>';
+
+  const wrap = document.getElementById('wrap' + section);
+  wrap.innerHTML = html;
+
+  // Now place blocks
+  classes.forEach(cls => {
+    cls.days.forEach(di => {
+      const topSlot  = (cls.time[0] - START) * 2;
+      const spanSlots = (cls.time[1] - cls.time[0]) * 2;
+      const topPx   = topSlot * SLOT_H;
+      const heightPx = spanSlots * SLOT_H - 4;
+
+      // Find the day column cells
+      const cells = wrap.querySelectorAll(`.day-col[data-day="${di}"]`);
+      // Use the first cell in that column as anchor
+      if (!cells[0]) return;
+
+      const colEl = cells[0].parentElement; // .cal
+      // We'll position absolutely inside a relative wrapper per column
+      // Better: place a block inside the correct slot cell using absolute positioning
+      // Let's just inject into the first cell of that column with a stack offset
+      // Actually we need a column-level container. Let's restructure with a column approach.
+      // We already have the cells array — place block inside topSlot cell.
+      const targetCell = cells[Math.floor(topSlot)];
+      if (!targetCell) return;
+
+      const block = document.createElement('div');
+      block.className = `block ${cls.color}`;
+      block.style.cssText = `top:0px; height:${heightPx}px; position:absolute; left:3px; right:3px;`;
+      block.innerHTML = `
+        <div class="bname">${cls.name}</div>
+        <div class="btime">${fmt(cls.time[0])}–${fmt(cls.time[1])}</div>
+        ${cls.room ? `<div class="broom">${cls.room}</div>` : ''}
+      `;
+
+      // Make the cell relative and taller to hold the block
+      targetCell.style.position = 'relative';
+      targetCell.style.overflow = 'visible';
+      targetCell.style.zIndex = '1';
+      targetCell.appendChild(block);
+    });
+  });
+}
+
+function show(sec) {
+  document.querySelectorAll('.grid-wrap').forEach(w => w.classList.remove('active'));
+  document.getElementById('wrap' + sec).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => { b.className = 'tab-btn'; });
+  const btn = sec === '21'
+    ? document.querySelector('.tab-btn:first-child')
+    : document.getElementById('btn22');
+  btn.classList.add(sec === '21' ? 'on21' : 'on22');
+}
+
+buildGrid('21');
+buildGrid('22');
+</script>
+</body>
+</html>
   .day-block {
     margin-bottom: 12px;
     border: 1px solid var(--border);
